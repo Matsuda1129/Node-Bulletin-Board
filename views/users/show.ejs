@@ -1,0 +1,21 @@
+<div class="midwidth">
+  <h2><%= user[0].name %>'s Data</h2>
+  </div>
+  <div>
+   <table class="table w-50 p-3 mx-auto">
+        <tr>
+            <th>ID</th>
+            <th>名前</th>
+            <th>email</th>
+             <th>更新</th>
+            <th>削除</th>
+        </tr>
+        <tr>
+            <td><%= user[0].id %></td>
+            <td><%= user[0].name %></td>
+            <td><%= user[0].email %></td>
+            <td><a href="/users/edit/<%= user[0]id %>">更新</a></td>
+            <td><a href="/users/delete/<%= user[0]id %>">削除</a></td>
+        </tr>
+    </table>
+</div>

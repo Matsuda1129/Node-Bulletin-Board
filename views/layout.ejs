@@ -1,0 +1,46 @@
+<head>
+  <link link type="text/css" rel="stylesheet" href="/css/styles.css" />
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+    crossorigin="anonymous"
+  />
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="head">
+    <div class="left">Node.js Lesson4</div>
+    <% if (loggedIn) { %>
+    <div class="right">
+      <a href="/users/<%= currentUser.username %>" class="text-white"> <%= currentUser.username %> </a>
+      <a
+        class="btn btn-lg dropdown-toggle dropdown-toggle-split "
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      ></a>
+      <a class="dropdown-menu" href="/users/logout" >Log out</a>
+    </div>
+
+    <%} else {%>
+    <a href="/users/login" class="right">Login</a>
+    <a href="/users/register" class="right">Register</a>
+    <% } %>
+
+    <a href="/everyonePosts" class="right">みんなの投稿</a>
+    <a href="/postPage" class="right">投稿の作成</a>
+    <a href="/users" class="right">HOME</a>
+  </div>
+  <div class="flashes">
+    <% if (flashMessages) { %> <% if (flashMessages.success) { %>
+    <div class="alert alert-success text-center"><%= flashMessages.success %></div>
+    <% } else if (flashMessages.error) { %>
+    <div class="alert alert-danger text-center"><%= flashMessages.error %></div>
+    <% } %> <% } %>
+  </div>
+  <br />
+  <%- body %>
+</body>
