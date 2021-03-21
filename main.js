@@ -41,7 +41,7 @@ app.use(
 
 app.use(layouts);
 app.use(express.static('public'));
-app.use(expressValidator());
+// app.use(expressValidator())
 app.use(
   express.urlencoded({
     extended: false,
@@ -69,7 +69,7 @@ passport.use(
     connection.query(sql, params, (err, users) => {
       console.log(users);
       console.log(users[0].name);
-      console.log(username)
+      console.log(username);
       if (username !== users[0].name) {
         return done(null, false);
       } else if (password !== users[0].password) {
@@ -99,12 +99,12 @@ app.get('/', (req, res) => {
 });
 
 app.get('/failure', (req, res) => {
-  req.flash("failure",)
-   res.redirect('/users/login');
+  req.flash('failure');
+  res.redirect('/users/login');
 });
 
 app.get('/success', (req, res) => {
-  console.log("succsess login");
+  console.log('succsess login');
   res.redirect('/users');
 });
 
