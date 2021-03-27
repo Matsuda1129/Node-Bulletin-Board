@@ -6,10 +6,11 @@ const express = require('express'),
   router = require('./routes/index'),
   methodOverride = require('method-override'),
   passport = require('passport'),
+  bodyParser = require('body-parser'),
   cookieParser = require('cookie-parser'),
   expressSession = require('express-session'),
   expressValidator = require('express-validator'),
-  bcrypt = require('bcrypt'),
+  jwt = require('jsonwebtoken'),
   LocalStrategy = require('passport-local').Strategy,
   mysql = require('mysql2'),
   connectFlash = require('connect-flash');
@@ -41,7 +42,8 @@ app.use(
 
 app.use(layouts);
 app.use(express.static('public'));
-// app.use(expressValidator())
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(
   express.urlencoded({
     extended: false,
@@ -67,15 +69,12 @@ passport.use(
     const sql = 'select * from users where name = ?';
     const params = [username];
     connection.query(sql, params, (err, users) => {
-      console.log(users);
-      console.log(users[0].name);
-      console.log(username);
       if (username !== users[0].name) {
         return done(null, false);
       } else if (password !== users[0].password) {
         return done(null, false);
       } else {
-        return done(null, { username: username, password: password });
+        done(null, { username: username, password: password });
       }
     });
   })
@@ -94,20 +93,6 @@ passport.deserializeUser((user, done) => {
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/', (req, res) => {
-  res.send({ user: req.user });
-});
-
-app.get('/failure', (req, res) => {
-  req.flash('failure');
-  res.redirect('/users/login');
-});
-
-app.get('/success', (req, res) => {
-  console.log('succsess login');
-  res.redirect('/users');
-});
-
 app.use((req, res, next) => {
   res.locals.loggedIn = req.isAuthenticated();
   res.locals.currentUser = req.user;
@@ -116,7 +101,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/', router);
-
-app.listen(app.get('port'), () => {
-  console.log(`Server running at http://localhost:${app.get('port')}`);
-});
+const server = app.listen(app.get('port'), () => {
+    console.log(`Server running at http://localhost: ${app.get('port')}`);
+  }),
+  io = require('socket.io')(server);
+require('./controllers/chatController')(io);

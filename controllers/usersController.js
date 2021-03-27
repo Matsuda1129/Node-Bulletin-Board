@@ -1,9 +1,14 @@
 'use strict';
 
 const passport = require('passport'),
+  express = require('express'),
+  app = express(),
+  cookieParser = require('cookie-parser'),
   bcrypt = require('bcrypt'),
-  LocalStrategy = require('passport-local').Strategy,
+  jwt = require('jsonwebtoken'),
   mysql = require('mysql2');
+
+app.use(cookieParser('secretCuisine123'));
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -15,16 +20,15 @@ const connection = mysql.createConnection({
 
 module.exports = {
   show: (req, res) => {
-    // const sql = 'select * from users';
-    // connection.query(sql, (err, result, fields) => {
-    //   if (err) throw err;
-    res.render('show');
-    // });
+    const sql = 'select * from users';
+    connection.query(sql, (err, result, fields) => {
+      if (err) throw err;
+      res.render('show', { user: result });
+    });
   },
   showView: (req, res) => {
     const sql = 'SELECT * FROM users WHERE id = ?';
     connection.query(sql, [req.params.id], (err, result, fields) => {
-      console.log(result);
       if (err) throw err;
       res.render('users/show', { user: result });
     });
@@ -85,35 +89,63 @@ module.exports = {
   loginView: (req, res) => {
     res.render('users/login');
   },
-  jwt: (req, res) => {
-    // const payload = {
-    //   id: results[0].id,
-    //   name: results[0].name,
-    //   email: results[0].email,
-    // };
-    // const token = jwt.sign(payload, 'secret');
-    // // return res.json({ token });
-    // jwt.verify(token, 'secret', (err, user) => {
-    //   if (err) {
-    //     return res.sendStatus(403);
-    //   } else {
-    //     console.log('okdaze');
-    //     return res.json({
-    //       user,
-    //     });
-    //   }
-    // });
+  authenticate: (req, res, next) => {
+    const sql = 'select * from users where name = ?';
+    let username = req.body.username;
+    let password = req.body.password;
+    connection.query(sql, username, (err, users) => {
+      console.log(users);
+      if (!users) {
+        return res.status(404).json({
+          error: {
+            message: 'Not the book found.',
+          },
+        });
+      } else if (username !== users[0].name) {
+        res.redirect('/users/login');
+      } else if (password !== users[0].password) {
+        res.redirect('/users/login');
+      } else {
+        const token = jwt.sign({ user: username }, 'secret_key');
+
+        res.cookie('authcookie', token, { maxAge: 900000, httpOnly: true });
+        next();
+      }
+    });
   },
-  authenticate: passport.authenticate('local', {
-    failureRedirect: '/failure',
-    successRedirect: '/success',
+  passportAuth: passport.authenticate('local', {
+    failureRedirect: '/users/login',
+    failureFlash: 'Failed to login.',
+    successRedirect: '/users',
+    successFlash: 'Logged in!',
   }),
-  isAuthenticated: (req, res, next) => {
+  cookieauthenticate: passport.authenticate('local', (req, res, users) => {
+    console.log(users);
+    const token = jwt.sign({ user: req.users.username }, 'secret_key');
+    res.cookie('authcookie', token, { maxAge: 900000, httpOnly: true });
+    res.redirect('/users');
+  }),
+  isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
+      console.log("sucess, isauthenticated")
       return next();
     } else {
-      res.redirect('/users/login');
+      console.log("failed, isauthenticated")
+      res.redirect('/users/login'); 
     }
+  },
+  jwtVerify: (req, res, next) => {
+    const authcookie = req.cookies.authcookie;
+    jwt.verify(authcookie, 'secret_key', (err, data) => {
+      if (err) {
+        console.log("err,jwtfailed")
+        res.sendStatus(403);
+      } else if (data.user) {
+        console.log("success,jwtfailed")
+        req.user = data.user;
+        next();
+      }
+    });
   },
   logout: (req, res) => {
     req.flash(
@@ -122,6 +154,7 @@ module.exports = {
     );
     console.log(req.session.passport.user);
     req.session.passport.user = undefined;
+    req.cookies.authcookie = undefined;
     res.redirect('/users');
   },
 };
