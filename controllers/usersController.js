@@ -26,7 +26,7 @@ module.exports = {
       res.render('show', { user: result });
     });
   },
-  showView: (req, res) => {
+  userView: (req, res) => {
     const sql = 'SELECT * FROM users WHERE id = ?';
     connection.query(sql, [req.params.id], (err, result, fields) => {
       if (err) throw err;
@@ -89,12 +89,11 @@ module.exports = {
   loginView: (req, res) => {
     res.render('users/login');
   },
-  authenticate: (req, res, next) => {
+  cookieAuth: (req, res, next) => {
     const sql = 'select * from users where name = ?';
     let username = req.body.username;
     let password = req.body.password;
     connection.query(sql, username, (err, users) => {
-      console.log(users);
       if (!users) {
         return res.status(404).json({
           error: {
@@ -119,29 +118,19 @@ module.exports = {
     successRedirect: '/users',
     successFlash: 'Logged in!',
   }),
-  cookieauthenticate: passport.authenticate('local', (req, res, users) => {
-    console.log(users);
-    const token = jwt.sign({ user: req.users.username }, 'secret_key');
-    res.cookie('authcookie', token, { maxAge: 900000, httpOnly: true });
-    res.redirect('/users');
-  }),
   isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
-      console.log("sucess, isauthenticated")
       return next();
     } else {
-      console.log("failed, isauthenticated")
-      res.redirect('/users/login'); 
+      res.redirect('/users/login');
     }
   },
   jwtVerify: (req, res, next) => {
     const authcookie = req.cookies.authcookie;
     jwt.verify(authcookie, 'secret_key', (err, data) => {
       if (err) {
-        console.log("err,jwtfailed")
-        res.sendStatus(403);
+        res.redirect('/users/login');
       } else if (data.user) {
-        console.log("success,jwtfailed")
         req.user = data.user;
         next();
       }
@@ -152,9 +141,8 @@ module.exports = {
       'success',
       `${req.session.passport.user.username}'s account logouted successfully!`
     );
-    console.log(req.session.passport.user);
     req.session.passport.user = undefined;
-    req.cookies.authcookie = undefined;
+    res.clearCookie('authcookie');
     res.redirect('/users');
   },
 };

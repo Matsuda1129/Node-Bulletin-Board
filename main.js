@@ -10,7 +10,6 @@ const express = require('express'),
   cookieParser = require('cookie-parser'),
   expressSession = require('express-session'),
   expressValidator = require('express-validator'),
-  jwt = require('jsonwebtoken'),
   LocalStrategy = require('passport-local').Strategy,
   mysql = require('mysql2'),
   connectFlash = require('connect-flash');
