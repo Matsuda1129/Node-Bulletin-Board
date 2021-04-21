@@ -3,13 +3,13 @@ services:
   mysql:
     image: mysql:5.7
     container_name: mysql_bulletin
-    environment:
-      MYSQL_ROOT_PASSWORD: root
+    environment: 
+        MYSQL_ROOT_PASSWORD: root
     ports:
       - 3306:3306
     volumes:
       - my-db:/var/lib/mysql
-
+    
   node:
     build:
       context: .
@@ -19,8 +19,8 @@ services:
       - ./Node-Bulletin-Board/
     ports:
       - 3000:3000
-    working_dir: '/Node-Bulletin-Board'
+    working_dir: "/Node-Bulletin-Board"    
     command: npm start
-
+    
 volumes:
   my-db:

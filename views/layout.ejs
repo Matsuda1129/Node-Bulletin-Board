@@ -15,7 +15,7 @@
     <div class="left">Node.js Lesson4</div>
     <% if (loggedIn) { %>
     <div class="right">
-      <a href="/users/<%= currentUser.id %>" class="text-white"> <%= currentUser.username %> </a>
+      <a href="/users/<%= user[0].id %>" class="text-white"> <%= currentUser.username %> </a>
       <a
         class="btn btn-lg dropdown-toggle dropdown-toggle-split "
         data-toggle="dropdown"

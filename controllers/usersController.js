@@ -1,121 +1,112 @@
 'use strict';
 
-const passport = require('passport');
-const express = require('express');
-const app = express();
-const cookieParser = require('cookie-parser');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models').User;
+const passport = require('passport'),
+  express = require('express'),
+  app = express(),
+  cookieParser = require('cookie-parser'),
+  bcrypt = require('bcrypt'),
+  jwt = require('jsonwebtoken'),
+  mysql = require('mysql2');
 
 app.use(cookieParser('secretCuisine123'));
 
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'root',
+  database: 'bulletin',
+  port: 3306,
+});
+
 module.exports = {
   show: (req, res) => {
-    User.findAll().then((results) => {
-      res.render('show', { user: results });
+    const sql = 'select * from users';
+    connection.query(sql, (err, result, fields) => {
+      if (err) throw err;
+      res.render('show', { user: result });
     });
   },
   userView: (req, res) => {
-    User.findOne({
-      where: { id: req.params.id },
-    }).then((result) => {
-      res.render('users/show', { user: result.dataValues });
+    const sql = 'SELECT * FROM users WHERE id = ?';
+    connection.query(sql, [req.params.id], (err, result, fields) => {
+      if (err) throw err;
+      res.render('users/show', { user: result });
     });
   },
   registerView: (req, res) => {
     res.render('users/register');
   },
-  register: async (req, res) => {
-    try {
-      const hashedPassword = await bcrypt.hash(req.body.password, 10);
-      User.create({
+  register: (req, res) => {
+    bcrypt.hash(req.body.password, 10).then((hash) => {
+      const sql = 'insert into users set ?';
+      const user = {
         name: req.body.name,
         email: req.body.email,
-        password: hashedPassword,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        password: hash,
+      };
+      connection.query(sql, user, (error, results, fields) => {
+        if (error) {
+          req.flash(
+            'error',
+            `Failed to create user account because: ${error.message}.`
+          );
+          res.redirect('/users/register');
+        }
+        req.flash('success', `${user.name}'s account created successfully!`);
+        res.redirect(`/users/${user.name}`);
       });
-      req.flash('success', `${req.body.name}'s account created successfully!`);
-      res.redirect(`/users`);
-    } catch (err) {
-      req.flash(
-        'error',
-        `Failed to create user account because: ${err.message}.`
-      );
-      res.redirect('/users/register');
-    }
+    });
   },
   edit: (req, res) => {
-    User.findOne({
-      where: { id: req.params.id },
-    }).then((result) => {
+    const sql = 'SELECT * FROM users WHERE id = ?';
+    connection.query(sql, [req.params.id], (err, result, fields) => {
+      if (err) throw err;
       res.render('users/edit', { user: result });
     });
   },
-  update: (req, res, next) => {
-    User.update(
-      {
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-      },
-      { where: { id: req.params.id } }
-    )
-      .then(() => {
-        req.flash(
-          'success',
-          `${req.body.name}'s account updated successfully!`
-        );
-        res.redirect('/users');
-      })
-      .catch((error) => {
-        console.log(`Error: ${error.message}`);
-        next(error);
-      });
+  update: (req, res) => {
+    const sql = 'UPDATE users SET ? WHERE id = ' + req.params.id;
+    connection.query(sql, req.body, (err, result, fields) => {
+      if (err) throw err;
+      req.flash(
+        'success',
+        `${req.session.passport.user.username}'s account updated successfully!`
+      );
+      res.redirect('/users');
+    });
   },
-  delete: (req, res, next) => {
-    User.destroy({
-      where: {
-        id: req.params.id,
-      },
-    })
-      .then(() => {
-        req.flash('success', `Account deleted successfully!`);
-        res.redirect('/users');
-      })
-      .catch((error) => {
-        console.log(`Error: ${error.message}`);
-        next(error);
-      });
+  delete: (req, res) => {
+    const sql = 'DELETE FROM users WHERE id = ?';
+    connection.query(sql, [req.params.id], function (err, result, fields) {
+      if (err) throw err;
+      req.flash(
+        'success',
+        `${req.session.passport.user.username}'s account deleted successfully!`
+      );
+      res.redirect('/users');
+    });
   },
   loginView: (req, res) => {
     res.render('users/login');
   },
   cookieAuth: (req, res, next) => {
-    User.findOne({
-      where: {
-        email: req.body.email,
-      },
-    }).then(async (result, err) => {
-      if (!result) {
+    const sql = 'select * from users where name = ?';
+    let username = req.body.username;
+    let password = req.body.password;
+    connection.query(sql, username, (err, users) => {
+      if (!users) {
         return res.status(404).json({
           error: {
-            message: 'Not the User found.',
+            message: 'Not the book found.',
           },
         });
-      }
-      const comparedPassword = await bcrypt.compare(
-        req.body.password,
-        result.dataValues.password
-      );
-
-      if (req.body.email !== result.dataValues.email) {
+      } else if (username !== users[0].name) {
         res.redirect('/users/login');
-      } else if (comparedPassword === false) {
+      } else if (password !== users[0].password) {
         res.redirect('/users/login');
       } else {
-        const token = jwt.sign({ user: req.body.email }, 'secret_key');
+        const token = jwt.sign({ user: username }, 'secret_key');
+
         res.cookie('authcookie', token, { maxAge: 900000, httpOnly: true });
         next();
       }
@@ -146,7 +137,10 @@ module.exports = {
     });
   },
   logout: (req, res) => {
-    req.flash('success', `${req.body.name}'s account logouted successfully!`);
+    req.flash(
+      'success',
+      `${req.session.passport.user.username}'s account logouted successfully!`
+    );
     req.session.passport.user = undefined;
     res.clearCookie('authcookie');
     res.redirect('/users');
