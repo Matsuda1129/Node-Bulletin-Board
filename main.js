@@ -1,34 +1,20 @@
 'use strict';
 
-const express = require('express'),
-  layouts = require('express-ejs-layouts'),
-  app = express(),
-  router = require('./routes/index'),
-  methodOverride = require('method-override'),
-  passport = require('passport'),
-  bodyParser = require('body-parser'),
-  cookieParser = require('cookie-parser'),
-  expressSession = require('express-session'),
-  expressValidator = require('express-validator'),
-  LocalStrategy = require('passport-local').Strategy,
-  mysql = require('mysql2'),
-  connectFlash = require('connect-flash');
-
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'bulletin',
-  port: 3306,
-});
-
-connection.connect((err) => {
-  if (err) {
-    console.log('error connecting: ' + err.stack);
-    return;
-  }
-  console.log('success');
-});
+require('dotenv').config();
+const express = require('express');
+const layouts = require('express-ejs-layouts');
+const app = express();
+const methodOverride = require('method-override');
+const passport = require('passport');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const expressSession = require('express-session');
+const expressValidator = require('express-validator');
+const LocalStrategy = require('passport-local').Strategy;
+const connectFlash = require('connect-flash');
+const router = require('./routes/index');
+const bcrypt = require('bcrypt');
+const User = require('./models').User;
 
 app.set('port', process.env.PORT || 3000);
 app.set('view engine', 'ejs');
@@ -64,19 +50,36 @@ app.use(
 app.use(connectFlash());
 
 passport.use(
-  new LocalStrategy((username, password, done) => {
-    const sql = 'select * from users where name = ?';
-    const params = [username];
-    connection.query(sql, params, (err, users) => {
-      if (username !== users[0].name) {
-        return done(null, false);
-      } else if (password !== users[0].password) {
-        return done(null, false);
-      } else {
-        done(null, { username: username, password: password });
-      }
-    });
-  })
+  new LocalStrategy(
+    {
+      usernameField: 'email',
+      passwordField: 'password',
+    },
+    (username, password, done) => {
+      User.findOne({
+        where: {
+          email: username,
+        },
+      }).then(async(results) => {
+        const comparedPassword = await bcrypt.compare(
+          password,
+          results.dataValues.password
+        );
+        if (username !== results.dataValues.email) {
+          return done(null, false);
+        } else if (comparedPassword === false) {
+          return done(null, false);
+        } else {
+          done(null, {
+            id: results.dataValues.id,
+            username: results.dataValues.name,
+            email: username,
+            password: password,
+          });
+        }
+      });
+    }
+  )
 );
 
 passport.serializeUser((user, done) => {
