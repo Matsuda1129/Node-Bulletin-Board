@@ -25,9 +25,11 @@ npm install  written Libraries in package.json.
 # Usage
 
 ```bash
+cp api/.env.example api/.env
 docker-compose build
-docker-compose up
-node main.js
+docker-compose up -d
+npx sequelize-cli db:migrate 
+npx sequelize-cli db:seed:all
 ```
 
 # Note

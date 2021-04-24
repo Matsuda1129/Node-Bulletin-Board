@@ -4,7 +4,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const now = new Date();
     return queryInterface.bulkInsert(
-      'users',
+      'Users',
       [
         {
           name: 'aaa',
@@ -47,6 +47,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('users', null, {});
+    return queryInterface.bulkDelete('Users', null, {});
   },
 };
