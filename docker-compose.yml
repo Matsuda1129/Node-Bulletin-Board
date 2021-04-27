@@ -14,7 +14,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: node-bulletin
+    container_name: node_bulletin
     volumes:
       - ./Node-Bulletin-Board/
     ports:

@@ -25,7 +25,8 @@ npm install  written Libraries in package.json.
 # Usage
 
 ```bash
-cp Node-Bulletin-Board/.env.example Node-Bulletin-Board/.env
+cd Node-Bulletin-Board
+cp .env.example .env
 docker-compose build
 docker-compose up -d
 npx sequelize-cli db:migrate 
