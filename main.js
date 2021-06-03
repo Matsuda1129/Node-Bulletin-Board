@@ -13,7 +13,7 @@ const expressValidator = require('express-validator');
 const LocalStrategy = require('passport-local').Strategy;
 const connectFlash = require('connect-flash');
 const router = require('./routes/index');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const User = require('./models').User;
 
 app.set('port', process.env.PORT || 3000);

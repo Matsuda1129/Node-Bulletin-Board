@@ -4,7 +4,7 @@ const passport = require('passport');
 const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models').User;
 
@@ -53,12 +53,13 @@ module.exports = {
       res.render('users/edit', { user: result });
     });
   },
-  update: (req, res, next) => {
+  update: async(req, res, next) => {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
     User.update(
       {
         name: req.body.name,
         email: req.body.email,
-        password: req.body.password,
+        password: hashedPassword,
       },
       { where: { id: req.params.id } }
     )
