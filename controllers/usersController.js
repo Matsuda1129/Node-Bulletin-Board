@@ -7,6 +7,9 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models').User;
+const { check } = require('express-validator');
+const { validationResult } = require('express-validator');
+
 
 app.use(cookieParser('secretCuisine123'));
 
@@ -26,26 +29,45 @@ module.exports = {
   registerView: (req, res) => {
     res.render('users/register');
   },
-  register: async (req, res) => {
-    try {
-      const hashedPassword = await bcrypt.hash(req.body.password, 10);
-      User.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+  validate: [check('password')
+  .isLength({ min: 7, max: 10, })
+  .withMessage("Please enter at least 7 characters for the password")
+  .custom((value, { req }) => {
+      if (req.body.password !== req.body.confirmPassword) {
+      throw new Error("Password dosen't match with conformPassword");
+      }
+      return true;
+  })],
+  register:  async (req, res) => {
+    const err = validationResult(req);
+      if(!err.isEmpty()) {
+      let messages = err.array().map(e => e.msg);
+      req.skip = true;
+      req.flash('error', messages.join(' and '));
+      return res.redirect('/users/register');
+    }
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    User.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: hashedPassword,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .then(() =>{
       req.flash('success', `${req.body.name}'s account created successfully!`);
       res.redirect(`/users`);
-    } catch (err) {
+    })
+    .catch((err) =>{
+
       req.flash(
         'error',
         `Failed to create user account because: ${err.message}.`
-      );
-      res.redirect('/users/register');
-    }
-  },
+        );
+        res.redirect('/users/register');
+    })
+      }
+        ,
   edit: (req, res) => {
     User.findOne({
       where: { id: req.params.id },

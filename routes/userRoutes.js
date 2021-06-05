@@ -1,8 +1,8 @@
-const router = require('express').Router(),
-  usersController = require('../controllers/usersController');
+const router = require('express').Router()
+const usersController = require('../controllers/usersController');
 router.get('/', usersController.show);
 router.get('/register', usersController.registerView);
-router.post('/register', usersController.register);
+router.post('/register', usersController.validate, usersController.register);
 router.get('/login', usersController.loginView);
 router.post('/login', usersController.cookieAuth, usersController.passportAuth);
 router.use(usersController.jwtVerify);
