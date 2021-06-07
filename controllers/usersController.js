@@ -10,7 +10,6 @@ const User = require('../models').User;
 const { check } = require('express-validator');
 const { validationResult } = require('express-validator');
 
-
 app.use(cookieParser('secretCuisine123'));
 
 module.exports = {
@@ -29,17 +28,9 @@ module.exports = {
   registerView: (req, res) => {
     res.render('users/register');
   },
-  validate: [check('password')
-  .isLength({ min: 7, max: 10, })
-  .withMessage("Please enter at least 7 characters for the password")
-  .custom((value, { req }) => {
-      if (req.body.password !== req.body.confirmPassword) {
-      throw new Error("Password dosen't match with conformPassword");
-      }
-      return true;
-  })],
   register:  async (req, res) => {
     const err = validationResult(req);
+    console.log(err);
       if(!err.isEmpty()) {
       let messages = err.array().map(e => e.msg);
       req.skip = true;
@@ -47,19 +38,28 @@ module.exports = {
       return res.redirect('/users/register');
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: hashedPassword,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    User.findOrCreate({
+      where: {email: req.body.email},
+      defaults: {
+        name: req.body.name,
+        email: req.body.email,
+        password: hashedPassword,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
     })
-    .then(() =>{
-      req.flash('success', `${req.body.name}'s account created successfully!`);
-      res.redirect(`/users`);
+    .then(([user, created]) =>{
+      if(created) {
+        req.flash('success', `${req.body.name}'s account created successfully!`);
+        return res.redirect(`/users`);
+      }
+        req.flash(
+          'error',
+          "Your email address is alredy registed"
+          );
+          return res.redirect('/users/register');
     })
     .catch((err) =>{
-
       req.flash(
         'error',
         `Failed to create user account because: ${err.message}.`
