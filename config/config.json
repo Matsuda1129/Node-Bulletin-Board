@@ -3,7 +3,7 @@
     "username": "root",
     "password": "root",
     "database": "bulletin",
-    "host": "127.0.0.1",
+    "host": "mysql",
     "dialect": "mysql",
     "operatorsAliases": 0,
     "logging": false

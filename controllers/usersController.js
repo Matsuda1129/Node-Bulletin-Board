@@ -7,7 +7,6 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models').User;
-const { check } = require('express-validator');
 const { validationResult } = require('express-validator');
 
 app.use(cookieParser('secretCuisine123'));
@@ -28,46 +27,37 @@ module.exports = {
   registerView: (req, res) => {
     res.render('users/register');
   },
-  register:  async (req, res) => {
+  register: async (req, res) => {
     const err = validationResult(req);
-    console.log(err);
-      if(!err.isEmpty()) {
-      let messages = err.array().map(e => e.msg);
+    if (!err.isEmpty()) {
+      let messages = err.array().map((e) => e.msg);
       req.skip = true;
       req.flash('error', messages.join(' and '));
       return res.redirect('/users/register');
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    User.findOrCreate({
-      where: {email: req.body.email},
-      defaults: {
-        name: req.body.name,
-        email: req.body.email,
-        password: hashedPassword,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
+    User.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: hashedPassword,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     })
-    .then(([user, created]) =>{
-      if(created) {
-        req.flash('success', `${req.body.name}'s account created successfully!`);
-        return res.redirect(`/users`);
-      }
+      .then(() => {
+        req.flash(
+          'success',
+          `${req.body.name}'s account created successfully!`
+        );
+        res.redirect(`/users`);
+      })
+      .catch((err) => {
         req.flash(
           'error',
-          "Your email address is alredy registed"
-          );
-          return res.redirect('/users/register');
-    })
-    .catch((err) =>{
-      req.flash(
-        'error',
-        `Failed to create user account because: ${err.message}.`
+          `Failed to create user account because: ${err.message}.`
         );
         res.redirect('/users/register');
-    })
-      }
-        ,
+      });
+  },
   edit: (req, res) => {
     User.findOne({
       where: { id: req.params.id },
@@ -75,7 +65,7 @@ module.exports = {
       res.render('users/edit', { user: result });
     });
   },
-  update: async(req, res, next) => {
+  update: async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     User.update(
       {

@@ -16,11 +16,10 @@ services:
       dockerfile: Dockerfile
     container_name: node_bulletin
     volumes:
-      - ./Node-Bulletin-Board
-      - ./node_modules
+      - ./:/node
     ports:
       - 3000:3000
-    working_dir: '/Node-Bulletin-Board'
+    working_dir: /node
     command: npm start
 
 volumes:
