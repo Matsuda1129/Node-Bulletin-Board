@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+  mysql:
+    image: mysql:5.6
+    container_name: mysql_bulletin
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
+    volumes:
+      - my-db:/var/lib/mysql
+
+  node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node_bulletin
+    volumes:
+      - ./:/node
+    ports:
+      - 3000:3000
+    working_dir: /node
+    command: npm start
+
+volumes:
+  my-db:
