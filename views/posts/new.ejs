@@ -1,0 +1,31 @@
+<div class="midwidth">
+  <div class="data-form">
+    <form action="/posts/new" method="POST">
+      <div class="form-group">
+        <label for="titleInput">Title　　　　　　　　　　　　　　　　　　　　　　　　30字以内</label>
+        <input
+          type="text"
+          name="title"
+          class="form-control"
+          id="inputTitle"
+          maxlength="30"
+          rows="1"
+        />
+      </div>
+      <div class="form-group">
+        <label for="content">Content　　　　　　　　　　　　　　　　　　　　　　140字以内</label>
+        <textarea
+          class="form-control h-25"
+          name="content"
+          id="inputContent"
+          maxlength="140"
+          rows="3"
+        ></textarea>
+      </div>
+      <br />
+      <button class="btn btn-sm btn-primary btn-block w-25" type="submit">
+        new post
+      </button>
+    </form>
+  </div>
+</div>

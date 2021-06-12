@@ -15,14 +15,16 @@
     <div class="left">Node.js Lesson4</div>
     <% if (loggedIn) { %>
     <div class="right">
-      <a href="/users/<%= currentUser.id %>" class="text-white"> <%= currentUser.username %> </a>
+      <a href="/users/<%= currentUser.id %>" class="text-white">
+        <%= currentUser.username %>
+      </a>
       <a
-        class="btn btn-lg dropdown-toggle dropdown-toggle-split "
+        class="btn btn-lg dropdown-toggle dropdown-toggle-split"
         data-toggle="dropdown"
         aria-haspopup="true"
         aria-expanded="false"
       ></a>
-      <a class="dropdown-menu" href="/users/logout" >Log out</a>
+      <a class="dropdown-menu" href="/users/logout">Log out</a>
     </div>
 
     <%} else {%>
@@ -30,13 +32,15 @@
     <a href="/users/register" class="right">Register</a>
     <% } %>
 
-    <a href="/everyonePosts" class="right">みんなの投稿</a>
-    <a href="/postPage" class="right">投稿の作成</a>
+    <a href="/posts/everyPosts" class="right">みんなの投稿</a>
+    <a href="/posts/new" class="right">投稿の作成</a>
     <a href="/users" class="right">HOME</a>
   </div>
   <div class="flashes">
     <% if (flashMessages) { %> <% if (flashMessages.success) { %>
-    <div class="alert alert-success text-center"><%= flashMessages.success %></div>
+    <div class="alert alert-success text-center">
+      <%= flashMessages.success %>
+    </div>
     <% } else if (flashMessages.error) { %>
     <div class="alert alert-danger text-center"><%= flashMessages.error %></div>
     <% } %> <% } %>
