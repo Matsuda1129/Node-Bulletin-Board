@@ -10,11 +10,13 @@
         <br />
         <div class="border p-3">
           <h3 class="pt-auto"><%= value.title %></h3>
-          <div class="pt-2"><%= value.content %></div>
+          <div class="pt-2 overflow-wrap" ><%= value.content %></div>
           <div class="pt-2">投稿者: <%= value.User.name %></div>
-          <div class="pt-2">♡</div>
+          <div class="pt-2 pb-2">
+            <i class="material-icons offLikes" id="heart" onclick="changeHeart()" >favorite</i>
+          </div>
           <% if (currentUser.id === value.created_id) {%>
-          <div class=d-inline">
+          <div class="d-inline">
             <a href="/posts/edit/<%= value.id %>">更新</a>
             <a href="/posts/delete/<%= value.id %>">削除</a>
           </div>
@@ -23,5 +25,19 @@
       </div>
       <% }); %>
     </div>
+    <script>
+      function changeHeart() {
+        const heart = document.getElementById('heart');
+        heart.addEventListener('click', () => {
+          if (heart.classList.contains('onLikes')) {
+            heart.classList.remove('onLikes');
+            heart.classList.add('offLikes');
+          } else {
+            heart.classList.remove('offLikes');
+            heart.classList.add('onLikes');
+          }
+        });
+      }
+    </script>
   </body>
 </html>

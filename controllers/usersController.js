@@ -144,10 +144,7 @@ module.exports = {
     if (req.isAuthenticated()) {
       return next();
     } else {
-      req.flash(
-        'error',
-        `Please Log in to your account.`
-      );
+      req.flash('error', `Please Log in to your account.`);
       res.redirect('/users/login');
     }
   },
