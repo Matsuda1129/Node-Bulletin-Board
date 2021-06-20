@@ -29,7 +29,7 @@ cd Node-Bulletin-Board
 cp .env.example .env
 docker-compose build
 docker-compose up -d
-npx sequelize-cli db:migrate 
+npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
 ```
 
