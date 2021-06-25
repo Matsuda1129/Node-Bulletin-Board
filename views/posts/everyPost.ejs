@@ -14,7 +14,7 @@
           <div class="pt-2 overflow-wrap" id="content">
             <%= post[i].content%>
           </div>
-          <div class="pt-2" id="name">投稿者:<%= post[i].name%></div>
+          <div class="pt-2" id="name">投稿者:<%= post[i].User.name%></div>
           <div class="pt-2 pb-2">
             <form action="/posts/everyPosts/<%= post[i].id %>" method="post">
               <% let likeCount%>

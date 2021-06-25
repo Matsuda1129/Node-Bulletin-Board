@@ -43,7 +43,6 @@ module.exports = {
     try {
       const post = await Post.findAll({
         include: 'User',
-        raw: true,
       });
       const likeAll = await Like.findAll({
         raw: true,
