@@ -1,6 +1,6 @@
 'use strict';
 
-require('dotenv').config();
+require('dotenv').config({path: '../.env'});
 const express = require('express');
 const layouts = require('express-ejs-layouts');
 const app = express();
@@ -102,9 +102,13 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/', function (req, res) {
+  res.sendFile(__dirname + '/index.html');
+});
+
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 app.use('/', router);
-const server = app.listen(app.get('port'), () => {
+http.listen(app.get('port'), () => {
     console.log(`Server running at http://localhost: ${app.get('port')}`);
-  }),
-  io = require('socket.io')(server);
-require('./controllers/chatController')(io);
+  })

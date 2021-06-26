@@ -1,0 +1,53 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Contents list</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div class="w-50 p-3 mx-auto">
+      <% for (let i = 0; i < post.length; i++) { %>
+      <div>
+        <br />
+        <div class="border p-3">
+          <h3 class="pt-auto" id="title"><%= post[i].title%></h3>
+          <div class="pt-2 overflow-wrap" id="content">
+            <%= post[i].content%>
+          </div>
+          <div class="pt-2" id="name">投稿者:<%= post[i].User.name%></div>
+          <div class="pt-2 pb-2">
+            <form action="/posts/everyPosts/<%= post[i].id %>" method="post">
+              <% let likeCount%>
+              <% const likeCheck = post[i].id %>
+              <% findLike :for (let i = 0; i < likeUserCount.length; i++){%>
+                <%if(likeUserCount[i].post_id == likeCheck) {%>
+                  <%  likeCount = likeUserCount[i].post_id_count%>
+                  <%break findLike;%>
+                  <%}}%>
+
+                  <% let likebullean%>
+                  <% findUserLike: for (let i = 0; i < likeAll.length; i++){ %>
+                    <%if (currentUser.id == likeAll[i].user_id && likeCheck == likeAll[i].post_id){%>
+                    <% likebullean = true;%>
+                      <%break findUserLike;%>
+                      <%}%>
+                      <%} %>
+                      <%if (likebullean == true){%>
+                        <button class="heart" ></button>　　<%=likeCount%>
+                        <%}else{%>
+                        <button class="offHeart"></button>　　<%=likeCount%>
+                        <%}%>
+            </form>
+          </div>
+          <% if (currentUser.id=== post[i].created_id) {%>
+          <div class="d-inline">
+            <a href="/posts/edit/<%= post[i].id %>">更新</a>
+            <a href="/posts/delete/<%= post[i].id %>">削除</a>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <% }; %>
+    </div>
+  </body>
+</html>

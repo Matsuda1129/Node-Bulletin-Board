@@ -1,13 +1,10 @@
-FROM node:8-alpine
+FROM node:16
 
 RUN mkdir -p /Node-Bulletin-Board
 WORKDIR /Node-Bulletin-Board
 
 COPY /package*.json ./
 
-RUN apk add --no-cache make gcc g++ python && \
-    npm install && \
-    npm rebuild bcrypt --build-from-source && \
-    apk del make gcc g++ python
+RUN npm install
 
 COPY . .

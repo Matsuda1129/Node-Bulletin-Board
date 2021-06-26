@@ -24,3 +24,18 @@ exports.loginValidator = [
     });
   }),
 ];
+
+exports.postValidator = [
+  check('title')
+    .not()
+    .isEmpty()
+    .withMessage('Title is empty')
+    .isLength({ max: 30 })
+    .withMessage('Please enter within 30 characters'),
+  check('content')
+    .not()
+    .isEmpty()
+    .withMessage('Content is empty')
+    .isLength({ max: 140 })
+    .withMessage('Please enter within 140 characters'),
+];
