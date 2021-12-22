@@ -24,7 +24,6 @@ module.exports = {
     }
     Post.create({
       created_id: res.locals.currentUser.id,
-      name: res.locals.currentUser.username,
       title: req.body.title,
       content: req.body.content,
       createdAt: new Date(),
